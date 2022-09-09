@@ -130,7 +130,9 @@ def mustache_render(template, context=None, **kwargs):
 def user_mustache_render(template, context=None, **kwargs):
     pystache.defaults.DELIMITERS = ('[[', ']]')
     renderer = pystache.Renderer(escape=lambda u: u)
-    return renderer.render(template, context, **kwargs)
+    q = renderer.render(template, context, **kwargs)
+    pystache.defaults.DELIMITERS = ('{{', '}}')
+    return q
 
 
 def build_url(request, host, path):
