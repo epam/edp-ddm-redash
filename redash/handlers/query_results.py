@@ -222,6 +222,11 @@ class QueryResultDropdownResource(BaseResource):
         require_access(query.data_source, current_user, view_only)
         try:
             return dropdown_values(query_id, self.current_org)
+        except NoResultFound as e:
+            if len(request.args) > 0:
+                return QueryDropdownsResource.parametrized_result(query_id, self.current_org)
+            else:
+                raise e
         except QueryDetachedFromDataSourceError as e:
             abort(400, message=str(e))
 
@@ -246,17 +251,18 @@ class QueryDropdownsResource(BaseResource):
             return dropdown_values(dropdown_query_id, self.current_org)
         except NoResultFound as e:
             if len(request.args) > 0:
-                return self.parametrized_result(dropdown_query_id)
+                return self.parametrized_result(dropdown_query_id, self.current_org)
             else:
                 raise e
 
-    def parametrized_result(self, dropdown_query_id):
+    @staticmethod
+    def parametrized_result(dropdown_query_id, current_org):
         dropdown_query = get_object_or_404(
-            models.Query.get_by_id_and_org, dropdown_query_id, self.current_org
+            models.Query.get_by_id_and_org, dropdown_query_id, current_org
         )
 
         parameterized_query = dropdown_query.parameterized
-        args = self.filter_args_by_query(parameterized_query=parameterized_query, args=request.args)
+        args = QueryDropdownsResource.filter_args_by_query(parameterized_query=parameterized_query, args=request.args)
 
         rq = run_query(parameterized_query, args, dropdown_query.data_source,
                        dropdown_query_id, False, 0)
@@ -273,14 +279,15 @@ class QueryDropdownsResource(BaseResource):
             result_id = rq['query_result']['id']
 
         query_result = models.QueryResult.get_by_id_and_org(
-            result_id, self.current_org
+            result_id, current_org
         )
 
         first_column = query_result.data["columns"][0]["name"]
-        pluck = partial(self._pluck_name_and_value, first_column)
+        pluck = partial(QueryDropdownsResource._pluck_name_and_value, first_column)
         return list(map(pluck, query_result.data["rows"]))
 
-    def filter_args_by_query(self, parameterized_query: ParameterizedQuery, args) -> dict:
+    @staticmethod
+    def filter_args_by_query(parameterized_query: ParameterizedQuery, args) -> dict:
         new_args = {}
         for sch in parameterized_query.schema:
             for k, v in args.items():
@@ -294,7 +301,8 @@ class QueryDropdownsResource(BaseResource):
 
         return new_args
 
-    def _pluck_name_and_value(self, default_column, row):
+    @staticmethod
+    def _pluck_name_and_value(default_column, row):
         row = {k.lower(): v for k, v in row.items()}
         name_column = "name" if "name" in row.keys() else default_column.lower()
         value_column = "value" if "value" in row.keys() else default_column.lower()
