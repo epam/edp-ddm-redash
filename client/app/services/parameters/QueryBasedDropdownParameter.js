@@ -66,23 +66,23 @@ class QueryBasedDropdownParameter extends Parameter {
   }
 
   loadDropdownValues(params) {
-    if (this.parentQueryId) {
+    let newParams = {};
 
-      let newParams = {};
-
-      for (let key in params) {
-        if (typeof(params[key]) === "object") {
-          newParams[`${key}[]`] = params[key];
-        } else {
-          newParams[key] = params[key];
-        }
+    for (let key in params) {
+      if (typeof(params[key]) === "object") {
+        newParams[`${key}[]`] = params[key];
+      } else {
+        newParams[key] = params[key];
       }
+    }
+
+    if (this.parentQueryId) {
       return Query.associatedDropdown({ queryId: this.parentQueryId, dropdownQueryId: this.queryId, params: newParams }).catch(() =>
         Promise.resolve([])
       );
     }
 
-    return Query.asDropdown({ id: this.queryId }).catch(Promise.resolve([]));
+    return Query.asDropdown({ id: this.queryId, params: newParams }).catch(Promise.resolve([]));
   }
 }
 

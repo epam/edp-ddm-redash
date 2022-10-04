@@ -388,7 +388,7 @@ const QueryService = {
   myQueries: params => axios.get("api/queries/my", { params }).then(mapResults),
   fork: ({ id }) => axios.post(`api/queries/${id}/fork`, { id }).then(getQuery),
   resultById: data => axios.get(`api/queries/${data.id}/results.json`),
-  asDropdown: data => axios.get(`api/queries/${data.id}/dropdown`),
+  asDropdown: ({id, params}) => axios.get(`api/queries/${id}/dropdown`, {params: params}),
   associatedDropdown: ({ queryId, dropdownQueryId, params }) =>
     axios.get(`api/queries/${queryId}/dropdowns/${dropdownQueryId}`, {params: params}),
   favorites: params => axios.get("api/queries/favorites", { params }).then(mapResults),
