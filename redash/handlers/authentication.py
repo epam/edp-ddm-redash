@@ -217,6 +217,9 @@ def login(org_slug=None):
 
     google_auth_url = get_google_auth_url(next_path)
 
+    if current_org.get_setting("auth_saml_enabled"):
+        return redirect(url_for('saml_auth.sp_initiated', org_slug=org_slug, next=next_path))
+
     return render_template(
         "login.html",
         org_slug=org_slug,

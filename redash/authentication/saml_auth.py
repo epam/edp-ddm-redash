@@ -13,6 +13,7 @@ from saml2.sigver import get_xmlsec_binary
 from saml2.mdstore import MetaDataExtern
 from urllib import parse
 import os
+from redash.authentication import get_next_path
 
 
 logger = logging.getLogger("saml_auth")
@@ -20,7 +21,7 @@ blueprint = Blueprint("saml_auth", __name__)
 inline_metadata_template = """<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor entityID="{{entity_id}}" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"><md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><md:KeyDescriptor use="signing"><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>{{x509_cert}}</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="{{sso_url}}"/><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="{{sso_url}}"/></md:IDPSSODescriptor></md:EntityDescriptor>"""
 
 
-def get_saml_client(org):
+def get_saml_client(org, next_url):
     """
     Return SAML configuration.
 
@@ -37,11 +38,12 @@ def get_saml_client(org):
         acs_url = url_for(
             "saml_auth.idp_initiated",
             org_slug=org.slug,
+            next=next_url,
             _external=True,
             _scheme=settings.SAML_SCHEME_OVERRIDE,
         )
     else:
-        acs_url = url_for("saml_auth.idp_initiated", org_slug=org.slug, _external=True)
+        acs_url = url_for("saml_auth.idp_initiated", org_slug=org.slug, next=next_url, _external=True)
 
     saml_settings = {
         "metadata": {"remote": [{"url": metadata_url}]},
@@ -105,7 +107,11 @@ def idp_initiated(org_slug=None):
         logger.error("SAML Login is not enabled")
         return redirect(url_for("redash.index", org_slug=org_slug))
 
-    saml_client = get_saml_client(current_org)
+    index_url = url_for("redash.index", org_slug=org_slug)
+    unsafe_next_path = request.args.get("next", index_url)
+    next_path = get_next_path(unsafe_next_path)
+
+    saml_client = get_saml_client(current_org, next_url=next_path)
     saml_client_urls_upgrade(saml_client)
 
     try:
@@ -150,9 +156,9 @@ def idp_initiated(org_slug=None):
         group_names = authn_response.ava.get("RedashGroups")
         user.update_group_assignments(group_names)
 
-    url = url_for("redash.index", org_slug=org_slug)
+    # url = url_for("redash.index", org_slug=org_slug)
 
-    return redirect(url)
+    return redirect(next_path)
 
 
 @blueprint.route(org_scoped_rule("/saml/login"))
@@ -161,7 +167,11 @@ def sp_initiated(org_slug=None):
         logger.error("SAML Login is not enabled")
         return redirect(url_for("redash.index", org_slug=org_slug))
 
-    saml_client = get_saml_client(current_org)
+    index_url = url_for("redash.index", org_slug=org_slug)
+    unsafe_next_path = request.args.get("next", index_url)
+    next_path = get_next_path(unsafe_next_path)
+
+    saml_client = get_saml_client(current_org, next_url=next_path)
     nameid_format = current_org.get_setting("auth_saml_nameid_format")
     if nameid_format is None or nameid_format == "":
         nameid_format = NAMEID_FORMAT_TRANSIENT
@@ -175,6 +185,7 @@ def sp_initiated(org_slug=None):
     for key, value in info["headers"]:
         if key == "Location":
             redirect_url = value
+
 
     response = redirect(redirect_url, code=302)
 
