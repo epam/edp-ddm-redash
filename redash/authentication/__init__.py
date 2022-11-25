@@ -253,10 +253,11 @@ def init_app(app):
     login_manager.init_app(app)
     login_manager.anonymous_user = models.AnonymousUser
     login_manager.REMEMBER_COOKIE_DURATION = settings.REMEMBER_COOKIE_DURATION
+    # login_manager.REMEMBER_COOKIE_REFRESH_EACH_REQUEST = True
 
     @app.before_request
     def extend_session():
-        session.permanent = True
+        # session.permanent = True
         app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
 
     from redash.security import csrf
@@ -299,7 +300,11 @@ def create_and_login_user(org, name, email, picture=None, attributes=None):
         models.db.session.add(user_object)
         models.db.session.commit()
 
-    login_user(user_object, remember=True)
+    session_idle = attributes.get('sessionIdle')
+    if session_idle:
+        login_user(user_object, remember=True, duration=timedelta(seconds=int(session_idle)))
+    else:
+        login_user(user_object, remember=True)
 
     return user_object
 

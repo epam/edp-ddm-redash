@@ -3,7 +3,7 @@ import axiosLib from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { Auth } from "@/services/auth";
 import qs from "query-string";
-import { restoreSession } from "@/services/restoreSession";
+//import { restoreSession } from "@/services/restoreSession";
 
 let createParams = {
   paramsSerializer: params => qs.stringify(params),
@@ -40,7 +40,8 @@ export const sessionRefreshInterceptor = createAuthRefreshInterceptor(
     // TODO: In axios@0.9.1 this check could be replaced with { skipAuthRefresh: true } flag. See axios-auth-refresh docs
     const requestUrl = get(error, "config.url");
     if (error.isAxiosError && (status === 401 || includes(message, "Please login")) && requestUrl !== "api/session") {
-      return restoreSession();
+      window.location = document.location;
+//      return restoreSession();
     }
     return Promise.reject(error);
   },
