@@ -115,6 +115,10 @@ REMEMBER_COOKIE_DURATION = int(
     os.environ.get("REDASH_REMEMBER_COOKIE_DURATION", 60 * 60 * 24 * 31)
 )
 
+SESSION_REFRESH_EACH_REQUEST = parse_boolean(
+    os.environ.get("REDASH_SESSION_REFRESH_EACH_REQUEST", "false")
+)
+
 # Doesn't set X-Frame-Options by default since it's highly dependent
 # on the specific deployment.
 # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
