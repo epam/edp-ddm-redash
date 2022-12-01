@@ -257,8 +257,9 @@ def init_app(app):
 
     @app.before_request
     def extend_session():
+        pass
         # session.permanent = True
-        app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
+        # app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
 
     from redash.security import csrf
 
@@ -302,7 +303,10 @@ def create_and_login_user(org, name, email, picture=None, attributes=None):
 
     session_idle = attributes.get('sessionIdle')
     if session_idle:
-        login_user(user_object, remember=True, duration=timedelta(seconds=int(session_idle)))
+        from flask import current_app as app
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(seconds=int(session_idle))
+        login_user(user_object, remember=True, duration=app.permanent_session_lifetime)
     else:
         login_user(user_object, remember=True)
 
