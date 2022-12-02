@@ -237,7 +237,12 @@ def login(org_slug=None):
 @routes.route(org_scoped_rule("/logout"))
 def logout(org_slug=None):
     logout_user()
-    return redirect(get_login_url(next=None))
+    metadata_url = current_org.get_setting("auth_saml_metadata_url")  # type: str
+    idx = metadata_url.index("realms/")
+    realm_idx = metadata_url.index("/", idx + 7)
+    redirect_url = "%s/protocol/openid-connect/logout?redirect_uri=%s" % (metadata_url[0:realm_idx],
+                                                                          get_login_url(next=None, external=True))
+    return redirect(redirect_url)
 
 
 def base_href():
