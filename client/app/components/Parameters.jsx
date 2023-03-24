@@ -54,6 +54,9 @@ export default class Parameters extends React.Component {
     if (!props.disableUrlUpdate) {
       updateUrl(parameters);
     }
+    forEach(parameters, param => {
+      this.props.globalParameters[param.name] = param.normalizedValue;
+    });
   }
 
   componentDidUpdate = prevProps => {
