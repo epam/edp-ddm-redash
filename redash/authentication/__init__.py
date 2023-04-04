@@ -263,7 +263,7 @@ def init_app(app):
 
     from redash.security import csrf
     prefix = settings.ROUTE_PREFIX
-    if prefix[0] != '/':
+    if prefix and prefix[0] != '/':
         prefix = '/' + prefix
 
     # Authlib's flask oauth client requires a Flask app to initialize
