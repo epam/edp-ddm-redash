@@ -97,13 +97,9 @@ class ApiExt(Api):
     def add_org_resource(self, resource, *urls, **kwargs):
         urls = [org_scoped_rule(url) for url in urls]
         if settings.ROUTE_PREFIX:
-            prefix = settings.ROUTE_PREFIX
-            if prefix[0:1] != "/":
-                prefix = "/" + prefix
-
             new_urls = []
             for url in urls:
-                new_urls.append(prefix + url)
+                new_urls.append(settings.ROUTE_PREFIX + url)
 
             urls = new_urls
 

@@ -44,10 +44,6 @@ class Routes {
   }
 
   public register<P>(id: string, route: RedashRoute<P>) {
-    if (process.env.REDASH_ROUTE_PREFIX) {
-        route.path = "/" + process.env.REDASH_ROUTE_PREFIX + route.path;
-    }
-
     const idOrNull = isString(id) ? id : null;
     this.unregister(idOrNull);
     if (isObject(route)) {

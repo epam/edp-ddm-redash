@@ -35,8 +35,17 @@ const isHotReloadingEnabled =
   isDevelopment && process.env.HOT_RELOAD === "true";
 
 const redashBackend = process.env.REDASH_BACKEND || "http://localhost:5000";
-const baseHref = CONFIG.baseHref || "/";
-const staticPath = CONFIG.staticPath || "/static/";
+let baseHref = CONFIG.baseHref || "/";
+let staticPath = CONFIG.staticPath || "/static/";
+
+if (process.env.REDASH_ROUTE_PREFIX.charAt(0) !== "/") {
+   process.env.REDASH_ROUTE_PREFIX = "/" + process.env.REDASH_ROUTE_PREFIX;
+}
+
+if (process.env.REDASH_ROUTE_PREFIX) {
+  staticPath = process.env.REDASH_ROUTE_PREFIX + staticPath;
+  baseHref = process.env.REDASH_ROUTE_PREFIX + baseHref;
+}
 const htmlTitle = CONFIG.title || "Redash";
 
 const basePath = path.join(__dirname, "client");

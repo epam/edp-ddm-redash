@@ -12,7 +12,7 @@ let createParams = {
 };
 
 if (process.env.REDASH_ROUTE_PREFIX) {
-  createParams["baseURL"] = "/" + process.env.REDASH_ROUTE_PREFIX
+  createParams["baseURL"] = process.env.REDASH_ROUTE_PREFIX
 }
 
 export const axios = axiosLib.create(createParams);

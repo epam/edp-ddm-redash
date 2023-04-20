@@ -3,6 +3,7 @@ FROM node:12 as frontend-builder
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
 
+ENV REDASH_ROUTE_PREFIX=reports
 ENV CYPRESS_INSTALL_BINARY=0
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
 

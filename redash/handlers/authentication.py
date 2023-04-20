@@ -242,6 +242,7 @@ def logout(org_slug=None):
     realm_idx = metadata_url.index("/", idx + 7)
     redirect_url = "%s/protocol/openid-connect/logout?redirect_uri=%s" % (metadata_url[0:realm_idx],
                                                                           base_href())
+    redirect_url = redirect_url.replace("http://", "https://")
     return redirect(redirect_url)
 
 

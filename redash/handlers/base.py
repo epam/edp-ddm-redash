@@ -15,14 +15,9 @@ from sqlalchemy import cast
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import sort_query
 
-prefix = settings.ROUTE_PREFIX
-
-if prefix and prefix[0:1] != "/":
-    prefix = "/" + prefix
-
 routes = Blueprint(
     "redash", __name__, template_folder=settings.fix_assets_path("templates"),
-    url_prefix=prefix,
+    url_prefix=settings.ROUTE_PREFIX,
 )
 
 

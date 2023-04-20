@@ -262,14 +262,11 @@ def init_app(app):
         # app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
 
     from redash.security import csrf
-    prefix = settings.ROUTE_PREFIX
-    if prefix and prefix[0] != '/':
-        prefix = '/' + prefix
 
     # Authlib's flask oauth client requires a Flask app to initialize
     for blueprint in [create_google_oauth_blueprint(app), saml_auth.blueprint, remote_user_auth.blueprint, ldap_auth.blueprint, ]:
         csrf.exempt(blueprint)
-        app.register_blueprint(blueprint, url_prefix=prefix)
+        app.register_blueprint(blueprint, url_prefix=settings.ROUTE_PREFIX)
 
     user_logged_in.connect(log_user_logged_in)
     login_manager.request_loader(request_loader)

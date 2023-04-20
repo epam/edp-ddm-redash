@@ -174,6 +174,8 @@ FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
 
 MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
 ROUTE_PREFIX = os.getenv('REDASH_ROUTE_PREFIX')
+if ROUTE_PREFIX and ROUTE_PREFIX[0:1] != "/":
+    ROUTE_PREFIX = "/" + ROUTE_PREFIX
 
 GOOGLE_CLIENT_ID = os.environ.get("REDASH_GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("REDASH_GOOGLE_CLIENT_SECRET", "")

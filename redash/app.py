@@ -12,7 +12,7 @@ class Redash(Flask):
             {
                 "template_folder": settings.FLASK_TEMPLATE_PATH,
                 "static_folder": settings.STATIC_ASSETS_PATH,
-                "static_url_path": "/static",
+                "static_url_path": settings.ROUTE_PREFIX + "/static" if settings.ROUTE_PREFIX else "/static",
             }
         )
         super(Redash, self).__init__(__name__, *args, **kwargs)
