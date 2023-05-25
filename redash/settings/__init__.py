@@ -96,6 +96,9 @@ COOKIES_SECURE = parse_boolean(
 SESSION_COOKIE_SECURE = parse_boolean(
     os.environ.get("REDASH_SESSION_COOKIE_SECURE") or str(COOKIES_SECURE)
 )
+
+SESSION_COOKIE_NAME = os.environ.get('SESSION_COOKIE_NAME', 'redash-session')
+
 # Whether the session cookie is set HttpOnly.
 SESSION_COOKIE_HTTPONLY = parse_boolean(
     os.environ.get("REDASH_SESSION_COOKIE_HTTPONLY", "true")
